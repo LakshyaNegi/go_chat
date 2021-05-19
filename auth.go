@@ -73,5 +73,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("User not found")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 	return
 }
