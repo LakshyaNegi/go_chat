@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -18,6 +19,7 @@ type login struct {
 var users = []login{
 	login{username: "lak", password: "lak"},
 	login{username: "abc", password: "abc"},
+	login{username: "aaa", password: "aaa"},
 }
 
 func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +74,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	log.Printf("User not found")
+	fmt.Printf("User not found")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 	return
 }
