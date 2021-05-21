@@ -1,25 +1,39 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 type authHandler struct {
 	next http.Handler
 }
 
-type login struct {
-	username string
-	password string
+var (
+	DBConn *gorm.DB
+)
+
+type Users struct {
+	gorm.Model
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
-var users = []login{
-	login{username: "lak", password: "lak"},
-	login{username: "abc", password: "abc"},
-	login{username: "aaa", password: "aaa"},
+func initDB() {
+	//var err error
+	DBConn, err := gorm.Open("sqlite3", "users.db")
+	if err != nil {
+		panic("Failed to connect database")
+	}
+
+	log.Printf("Database connected")
+
+	DBConn.AutoMigrate(&Users{})
+	log.Printf("Database migrated")
 }
 
 func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -57,24 +71,66 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	pass := r.FormValue("password")
 
-	l := &login{username: username, password: pass}
+	//log.Printf("entered user %s , password %s", username, pass)
 
-	for _, user := range users {
-		if user.username == l.username && user.password == l.password {
+	//l := &login{username: username, password: pass}
 
-			http.SetCookie(w, &http.Cookie{
-				Name:    "auth",
-				Value:   user.username,
-				Path:    "/",
-				Expires: time.Now().Add(180 * time.Second)})
+	// for _, user := range users {
+	// 	if user.username == l.username && user.password == l.password {
 
-			w.Header()["Location"] = []string{"/chat"}
-			w.WriteHeader(http.StatusTemporaryRedirect)
-			return
-		}
+	// 		http.SetCookie(w, &http.Cookie{
+	// 			Name:    "auth",
+	// 			Value:   user.username,
+	// 			Path:    "/",
+	// 			Expires: time.Now().Add(180 * time.Second)})
+
+	// 		w.Header()["Location"] = []string{"/chat"}
+	// 		w.WriteHeader(http.StatusTemporaryRedirect)
+	// 		return
+	// 	}
+	// }
+
+	db, err := gorm.Open("sqlite3", "users.db")
+	if err != nil {
+		panic("Failed to connect database")
 	}
 
-	fmt.Printf("User not found")
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	var user Users
+	db.Where("Username = ?", username).First(&user)
+
+	//log.Printf("db user %s , password %s", user.Username, user.Password)
+
+	if pass != user.Password {
+		log.Printf("Password error")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    "auth",
+		Value:   username,
+		Path:    "/",
+		Expires: time.Now().Add(180 * time.Second)})
+
+	w.Header()["Location"] = []string{"/chat"}
+	w.WriteHeader(http.StatusTemporaryRedirect)
+	return
+
+}
+
+func registerHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := gorm.Open("sqlite3", "users.db")
+	if err != nil {
+		panic("Failed to connect database")
+	}
+
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	user := &Users{Username: username, Password: password}
+	//log.Printf("login user", user)
+
+	db.Create(user)
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 	return
 }
