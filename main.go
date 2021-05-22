@@ -33,13 +33,16 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
+	initDB()
+
 	r := newRoom()
 	// root
 	http.Handle("/", MustAuth(&templateHandler{filename: "chat.html"}))
 	http.Handle("/login", &templateHandler{filename: "login.html"})
+	http.Handle("/register", &templateHandler{filename: "register.html"})
 	http.Handle("/room", r)
 	http.HandleFunc("/auth/", loginHandler)
-
+	http.HandleFunc("/regHandler/", registerHandler)
 	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &http.Cookie{
 			Name:   "auth",
