@@ -71,25 +71,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	pass := r.FormValue("password")
 
-	//log.Printf("entered user %s , password %s", username, pass)
-
-	//l := &login{username: username, password: pass}
-
-	// for _, user := range users {
-	// 	if user.username == l.username && user.password == l.password {
-
-	// 		http.SetCookie(w, &http.Cookie{
-	// 			Name:    "auth",
-	// 			Value:   user.username,
-	// 			Path:    "/",
-	// 			Expires: time.Now().Add(180 * time.Second)})
-
-	// 		w.Header()["Location"] = []string{"/chat"}
-	// 		w.WriteHeader(http.StatusTemporaryRedirect)
-	// 		return
-	// 	}
-	// }
-
 	db, err := gorm.Open("sqlite3", "users.db")
 	if err != nil {
 		panic("Failed to connect database")
@@ -110,9 +91,9 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		Name:    "auth",
 		Value:   username,
 		Path:    "/",
-		Expires: time.Now().Add(180 * time.Second)})
+		Expires: time.Now().Add(5 * time.Minute)})
 
-	w.Header()["Location"] = []string{"/chat"}
+	w.Header()["Location"] = []string{"/"}
 	w.WriteHeader(http.StatusTemporaryRedirect)
 	return
 

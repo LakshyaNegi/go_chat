@@ -1,0 +1,27 @@
+<html>
+
+<head>
+    <title>Chat</title>
+    <style>
+        input {
+            display: block;
+        }
+
+        ul {
+            list-style: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Index</h3>
+    <a href="/chat">deafault room</a>
+    <form id="registerform" method="POST" action="/join">
+        New Room : <input type="text" value="" name="newroomname">
+        <input type="submit" value="Join" />
+    </form>
+    <a href="/logout">sign out</a>
+
+</body>
+
+</html>

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -8,6 +9,7 @@ import (
 )
 
 type room struct {
+	name    string
 	forward chan *message
 	join    chan *client
 	leave   chan *client
@@ -19,8 +21,9 @@ const (
 	messageBufferSize = 256
 )
 
-func newRoom() *room {
+func newRoom(name string) *room {
 	return &room{
+		name:    name,
 		forward: make(chan *message),
 		join:    make(chan *client),
 		leave:   make(chan *client),
@@ -52,6 +55,12 @@ func (r *room) run() {
 var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize, WriteBufferSize: socketBufferSize}
 
 func (r *room) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	// vars := mux.Vars(req)
+	// roomName, _ := vars["roomName"]
+	// r.name = roomName
+
+	fmt.Println(r.name)
+
 	socket, err := upgrader.Upgrade(rw, req, nil)
 	//socket := *websocket.Conn
 	if err != nil {
