@@ -35,12 +35,17 @@ func main() {
 
 	initDB()
 
-	r := newRoom()
+	r := newRoom("defaultroom")
 	// root
-	http.Handle("/", MustAuth(&templateHandler{filename: "chat.html"}))
+	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
 	http.Handle("/login", &templateHandler{filename: "login.html"})
 	http.Handle("/register", &templateHandler{filename: "register.html"})
-	http.Handle("/room", r)
+	http.Handle("/", MustAuth(&templateHandler{filename: "index.html"}))
+
+	http.Handle("/room/{roomName}", r)
+
+	http.HandleFunc("/join", joinRoomHandler)
+
 	http.HandleFunc("/auth/", loginHandler)
 	http.HandleFunc("/regHandler/", registerHandler)
 	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
